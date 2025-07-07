@@ -1,10 +1,69 @@
-# Python-generated files
+# Byte-compiled / optimized / DLL files
 __pycache__/
-*.py[oc]
-build/
-dist/
-wheels/
-*.egg-info
+*.py[cod]
+*$py.class
+
+# Cython debug symbols
+cython_debug/
+
+# Django stuff:
+*.log
+*.pot
+*.pyc
+*.pyo
+*.db
+*.sqlite3
+
+# Ignore Django migration history (optional)
+# **/migrations/*.py
+# **/migrations/*.pyc
+
+# Environment variables and secrets
+.env
+*.env
 
 # Virtual environments
-.venv
+.venv/
+env/
+ENV/
+venv/
+venv.bak/
+env.bak/
+
+# VSCode
+.vscode/
+
+# Packaging
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# MyPy / Pyright / Ruff / PyLint
+.mypy_cache/
+.pyright/
+ruff_cache/
+pylint-report.txt
+.pyre/
+
+# Coverage / testing
+.
