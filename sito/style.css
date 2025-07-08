@@ -32,14 +32,6 @@ input[type="tel"] {
     display: block;        /* centra l'immagine */
     margin: 0 auto 20px auto;  /* margine sopra/sotto */
 }
-.piatto{
-    width: 150px;          /* larghezza tipica di un piatto */
-    height: auto;         /* altezza tipica di un piatto */
-    background-color: #f0f0f0; /* colore di sfondo per il piatto */
-    display: block;        /* centra l'immagine */
-    margin: 0 auto 20px auto;  /* margine sopra/sotto */
-    
-}
 
 .header {
     padding: 15px 0;
@@ -94,9 +86,9 @@ body {
 
         .menu-item img {
             width: 120px;
-            height: 120px;
+            height: 200px;
             object-fit: cover;
-            border-radius: 50%;  /* Se vuoi effetto "piatto tondo" */
+            border-radius: 8px;
             margin: 0 auto;
             display: block;
         }
