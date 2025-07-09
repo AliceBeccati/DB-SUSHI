@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestione Ristorante</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: white;
+            color: black;
+            margin: 20px;
+        }
+        .container {
+            display: flex;
+            justify-content: space-between;
+        }
+        .box {
+            border: 2px solid black;
+            padding: 15px;
+            width: 30%;
+        }
+        h3 {
+            border-bottom: 1px solid black;
+            padding-bottom: 5px;
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+        }
+        input, select, textarea, button {
+            width: 100%;
+            padding: 5px;
+            margin-top: 5px;
+            box-sizing: border-box;
+        }
+        textarea {
+            height: 120px; /* area descrizione più grande */
+            resize: vertical;
+        }
+        .licenza {
+            border: 2px solid red;
+            padding: 10px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+
+        <div class="box">
+            <h3>Nuova Prenotazione</h3>
+            <label>ID</label>
+            <input type="text">
+            <label>Data</label>
+            <input type="date">
+            <label>Orario</label>
+            <input type="time">
+            <label>Turno</label>
+            <select>
+                <option value="Pranzo">Pranzo</option>
+                <option value="Cena">Cena</option>
+            </select>
+            <label>Username</label>
+            <input type="text">
+            <button>Aggiungi</button>
+
+            <h3 style="margin-top:20px; color: #66ccff;">Applica Sconto</h3>
+            <label>ID Tavolo</label>
+            <input type="text">
+            <label>Sconto</label>
+            <input type="text">
+            <button>Aggiungi</button>
+        </div>
+
+        <div class="box">
+            <h3>Nuovi Piatti</h3>
+            <label>Foto</label>
+            <input type="file">
+            <label>Tipologia</label>
+            <input type="text">
+            <label>Descrizione</label>
+            <textarea></textarea>
+            <label>Prezzo</label>
+            <input type="number">
+            <label>Nome</label>
+            <input type="text">
+            <button>Aggiungi</button>
+
+            <h3 style="margin-top:20px; color: violet">Visualizza Piatti in lavorazione dallo Chef</h3>
+            <input type="text">
+            <button>Visualizza</button>
+        </div>
+
+        <div class="box">
+            <h3>Gestione Dipendenti</h3>
+            <label>Nome</label>
+            <input type="text">
+            <label>Ruolo</label>
+            <select>
+                <option>Cuoco</option>
+                <option>Cameriere</option>
+            </select>
+            <label>ID</label>
+            <input type="text">
+            <button>Aggiungi</button>
+
+            <div class="licenza">
+                <h4 style="color:red; margin: 0;">Licenzia</h4>
+                <label>Nome</label>
+                <input type="text">
+                <label>ID</label>
+                <input type="text">
+                <button style="background-color: red; color: black;">Licenzia</button>
+            </div>
+        </div>
+
+    </div>
+
+</body>
+</html>
