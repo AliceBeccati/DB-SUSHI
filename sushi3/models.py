@@ -21,6 +21,7 @@ class PrenotaT(models.Model):
 
 class Cliente(models.Model):
     username = models.CharField(db_column='Username', primary_key=True, max_length=50)
+    attivo = models.IntegerField(db_column='Attivo', default=0)
     id_tavolo = models.ForeignKey('Tavolo', db_column='ID_tavolo', on_delete=models.DO_NOTHING, blank=True, null=True)
 
     class Meta:
@@ -81,7 +82,7 @@ class Menu(models.Model):
 class Piatto(models.Model):
     nome_piatto = models.CharField(db_column='Nome_piatto', primary_key=True, max_length=100)
     foto = models.CharField(db_column='Foto', max_length=255)
-    tipologia = models.ForeignKey('Menu', db_column='Tipologia', on_delete=models.DO_NOTHING)
+    tipologia = models.CharField(db_column='Tipologia',max_length=50)
     descrizione = models.CharField(db_column='Descrizione', max_length=255)
     prezzo = models.DecimalField(db_column='Prezzo', max_digits=8, decimal_places=2, blank=True, null=True)
 
