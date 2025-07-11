@@ -53,17 +53,23 @@ class Sconto(models.Model):
         db_table = 'Sconto'
 
 class Ordine(models.Model):
+    id = models.AutoField(primary_key=True, db_column='id')  # nuova PK
+    id_ordine = models.IntegerField(db_column='ID_ordine')   # ora campo normale
     id_tavolo = models.ForeignKey('Tavolo', db_column='ID_tavolo', on_delete=models.DO_NOTHING)
-    id_ordine = models.IntegerField(db_column='ID_ordine')
     npiatti = models.IntegerField(db_column='nPiatti')
 
     class Meta:
         db_table = 'Ordine'
-        unique_together = (('id_tavolo', 'id_ordine'),)
+        unique_together = (('id_ordine', 'id_tavolo'),)
+
+    def __str__(self):
+        return f"Ordine {self.id_ordine} (Tavolo {self.id_tavolo_id})"
+
 
 class Composizione(models.Model):
+    id = models.AutoField(primary_key=True, db_column='id')
     id_tavolo = models.ForeignKey('Tavolo', db_column='ID_tavolo', on_delete=models.DO_NOTHING)
-    id_ordine = models.ForeignKey('Ordine', db_column='ID_ordine', on_delete=models.DO_NOTHING)
+    id_ordine = models.ForeignKey('Ordine', db_column='id_ordine', on_delete=models.DO_NOTHING)
     nome_piatto = models.ForeignKey('Piatto', db_column='Nome_piatto', on_delete=models.DO_NOTHING)
     quantita = models.IntegerField()
 

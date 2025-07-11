@@ -1,30 +1,34 @@
+# views.py
 
-
-from django.shortcuts import render
-from .models import Piatto
-
+from collections import Counter
+from django.shortcuts import render, redirect, get_object_or_404
+from django.http import HttpResponse
+from django.db import transaction
+from django.db.models import Max
 from django.conf import settings
+import os
+
+from .models import (
+    Piatto, Tavolo, Ordine, Composizione,
+    Cliente, Prenotazione, PrenotaT,
+    Personale
+)
+
 
 def visualizza_piatti(request):
     piatti = Piatto.objects.all()
-    return render(request, 'sushi3/piatti.html', {'piatti': piatti, 'MEDIA_URL': settings.MEDIA_URL})
+    return render(request, 'sushi3/piatti.html', {
+        'piatti': piatti,
+        'MEDIA_URL': settings.MEDIA_URL
+    })
 
-
-from django.shortcuts import render, redirect
-from .models import Piatto
-from collections import Counter
-
-from django.shortcuts import render, redirect
-from .models import Piatto
-from collections import Counter
 
 def pagina_ordine_sushi(request):
     if 'carrello' not in request.session:
         request.session['carrello'] = []
 
     if request.method == 'POST':
-        action = request.POST.get('action_type')
-        if action == 'aggiungi':
+        if request.POST.get('action_type') == 'aggiungi':
             piatto_id = request.POST.get('piatto_id')
             if piatto_id:
                 carrello = request.session['carrello']
@@ -36,80 +40,81 @@ def pagina_ordine_sushi(request):
     piatti = Piatto.objects.all()
     counts = Counter(request.session.get('carrello', []))
     carrello = [
-        {
-            'piatto': Piatto.objects.get(nome_piatto=nome),
-            'quantita': qty
-        }
+        {'piatto': Piatto.objects.get(nome_piatto=nome), 'quantita': qty}
         for nome, qty in counts.items()
     ]
 
     return render(request, 'sushi3/piatti.html', {
         'piatti': piatti,
-        'carrello': carrello,
+        'carrello': carrello
     })
-
-
-
-
-
-from .models import Ordine, Composizione, Tavolo, Piatto
-from django.utils.crypto import get_random_string
-from django.http import HttpResponseRedirect
-from django.urls import reverse
 
 def invia_ordine(request):
     carrello = request.session.get('carrello', [])
-
     if not carrello:
-        return HttpResponseRedirect(reverse('ordina_sushi'))  # se carrello vuoto
+        return redirect('ordina_sushi')
 
-    # Simuliamo un tavolo (es. 1) per ora
     tavolo = Tavolo.objects.first()
     if not tavolo:
         return HttpResponse("❌ Nessun tavolo disponibile")
 
-    # Genera ID ordine (es. random o incrementale)
-    id_ordine = int(get_random_string(length=5, allowed_chars='1234567890'))
+    try:
+        tavolo_1 = Tavolo.objects.get(pk=1)
+    except Tavolo.DoesNotExist:
+        return HttpResponse("❌ Tavolo 1 non trovato")
 
-    # Conta i piatti
-    npiatti = len(carrello)
+    counts = Counter(carrello)
+    npiatti = sum(counts.values())
 
-    # Crea ordine
+    max_id = Ordine.objects.filter(id_tavolo=tavolo_1).aggregate(Max('id_ordine'))['id_ordine__max']
+    next_id = 1 if max_id is None else max_id + 1
+
     ordine = Ordine.objects.create(
         id_tavolo=tavolo,
-        id_ordine=id_ordine,
+        id_ordine=next_id,
         npiatti=npiatti
     )
 
-    # Conta le quantità dei piatti
-    from collections import Counter
-    counts = Counter(carrello)
-
     for nome_piatto, qty in counts.items():
+        piatto = Piatto.objects.get(nome_piatto=nome_piatto)
         Composizione.objects.create(
-            nome_piatto=nome_piatto,
-            id_tavolo=tavolo,
-            id_ordine=id_ordine,
+            id_ordine=ordine,         # usa l'oggetto Ordine (PK = id)
+            id_tavolo=tavolo,         # usa l'oggetto Tavolo
+            nome_piatto=piatto,
             quantita=qty
         )
 
-    # Svuota carrello
     request.session['carrello'] = []
+    return redirect('piatti')
 
-    return HttpResponseRedirect(reverse('ordina_sushi'))
+def storico_ordini(request):
+    ordini = Ordine.objects.filter(id_tavolo=1)
+    lista_ordini = []
 
+    for ordine in ordini:
+        composizioni = Composizione.objects.filter(
+            id_ordine=ordine,
+            id_tavolo=ordine.id_tavolo
+        )
+        piatti = [(c.nome_piatto.nome_piatto, c.quantita) for c in composizioni]
+        lista_ordini.append({
+            "ordine": ordine,
+            "piatti": piatti
+        })
 
+    return render(request, 'storico_ordini.html', {
+        "lista_ordini": lista_ordini
+    })
 
-###################################################################################
-from django.shortcuts import render
 
 def amministratore(request):
-    return render(request, 'sushi3/amministratore.html')
+    tavoli = Tavolo.objects.all()
+    dipendenti = Personale.objects.all()
+    return render(request, 'sushi3/amministratore.html', {
+        'tavoli': tavoli,
+        'dipendenti': dipendenti
+    })
 
-from django.shortcuts import render, redirect
-from .models import Cliente, Prenotazione, Tavolo, PrenotaT
-from django.db import transaction
-from django.utils import timezone
 
 @transaction.atomic
 def aggiungi_prenotazione(request):
@@ -120,37 +125,29 @@ def aggiungi_prenotazione(request):
         turno = request.POST.get('turno')
         id_tavolo = request.POST.get('id_tavolo')
 
-        # 1. Crea il cliente se non esiste
-        cliente, creato = Cliente.objects.get_or_create(
+        cliente, _ = Cliente.objects.get_or_create(
             username=username,
             defaults={'attivo': 0, 'id_tavolo': None}
         )
 
-        # 2. Trova il prossimo id_pren disponibile
         last = Prenotazione.objects.order_by('-id_pren').first()
         new_id = (last.id_pren + 1) if last else 1
 
-        # 3. Crea la prenotazione
         pren = Prenotazione.objects.create(
-        data=data,
-        orario=orario,
-        turno=turno,
-        username=cliente  # ✅ giusto
-    )
+            data=data,
+            orario=orario,
+            turno=turno,
+            username=cliente
+        )
 
-
-        # 4. Collega la prenotazione al tavolo
         tavolo = Tavolo.objects.get(id_tavolo=id_tavolo)
         PrenotaT.objects.create(id_pren=pren, id_tavolo=tavolo)
 
         return redirect('amministratore')
 
-    # GET → visualizza la pagina con i tavoli
     tavoli = Tavolo.objects.all()
     return render(request, 'sushi3/amministratore.html', {'tavoli': tavoli})
 
-import os
-from django.conf import settings
 
 def aggiungi_piatto(request):
     if request.method == 'POST':
@@ -160,13 +157,11 @@ def aggiungi_piatto(request):
         tipologia = request.POST['tipologia']
         immagine = request.FILES['foto']
 
-        # Verifica se il piatto già esiste
         if Piatto.objects.filter(nome_piatto=nome).exists():
             return render(request, 'sushi3/amministratore.html', {
                 'messaggio_piatto': '⚠️ Il piatto esiste già e non è stato aggiunto.'
             })
 
-        # Salva l'immagine nella cartella media/foto_piatti
         path_dir = os.path.join(settings.MEDIA_ROOT, 'foto_piatti')
         os.makedirs(path_dir, exist_ok=True)
 
@@ -175,38 +170,37 @@ def aggiungi_piatto(request):
             for chunk in immagine.chunks():
                 f.write(chunk)
 
-        # Salva il piatto nel DB con solo il nome del file immagine
-        nuovo_piatto = Piatto(
+        Piatto.objects.create(
             nome_piatto=nome,
             descrizione=descrizione,
             prezzo=prezzo,
             tipologia=tipologia,
-            foto=immagine.name  # salva solo il nome, NON il path completo
+            foto=immagine.name
         )
-        nuovo_piatto.save()
 
         return render(request, 'sushi3/amministratore.html', {
             'messaggio_piatto': '✅ Piatto aggiunto con successo.'
         })
-    
-from .models import Personale
+
 
 def aggiungi_dipendente(request):
     if request.method == 'POST':
         nome = request.POST['nome']
         ruolo = request.POST['ruolo']
 
-        # Controllo per evitare duplicati (nome + ruolo)
         if Personale.objects.filter(nome_pers=nome, ruolo=ruolo).exists():
             return render(request, 'sushi3/amministratore.html', {
                 'messaggio_piatto': '⚠️ Dipendente già inserito.'
             })
 
-        Personale.objects.create(
-            nome_pers=nome,
-            ruolo=ruolo
-        )
+        Personale.objects.create(nome_pers=nome, ruolo=ruolo)
 
         return render(request, 'sushi3/amministratore.html', {
             'messaggio_piatto': '✅ Dipendente aggiunto con successo.'
         })
+
+
+def elimina_dipendente(request, id_personale):
+    dipendente = get_object_or_404(Personale, id_personale=id_personale)
+    dipendente.delete()
+    return redirect('amministratore')

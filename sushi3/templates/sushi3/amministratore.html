@@ -6,7 +6,7 @@
     <style>
         body {
             font-family: 'Segoe UI', sans-serif;
-            background-color: #f2f6fa;
+            background: linear-gradient(to right, #eef2f3, #ffffff);
             margin: 0;
             padding: 30px;
         }
@@ -15,6 +15,7 @@
             text-align: center;
             color: #2c3e50;
             margin-bottom: 40px;
+            font-size: 36px;
         }
 
         .container {
@@ -27,21 +28,27 @@
         .form-box {
             background-color: #ffffff;
             padding: 25px 30px;
-            border-radius: 12px;
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.05);
-            width: 400px;
+            border-radius: 16px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.07);
+            width: 420px;
+            transition: transform 0.2s ease;
+        }
+
+        .form-box:hover {
+            transform: translateY(-4px);
         }
 
         h2 {
             color: #34495e;
-            border-bottom: 2px solid #e0e0e0;
-            padding-bottom: 10px;
+            border-left: 6px solid #3498db;
+            padding-left: 10px;
             margin-bottom: 20px;
+            font-size: 22px;
         }
 
         label {
             font-weight: bold;
-            margin-top: 10px;
+            margin-top: 12px;
             display: block;
             color: #2c3e50;
         }
@@ -50,6 +57,7 @@
         input[type="date"],
         input[type="time"],
         input[type="number"],
+        input[type="file"],
         select,
         textarea {
             width: 100%;
@@ -57,13 +65,9 @@
             margin-top: 6px;
             margin-bottom: 18px;
             border: 1px solid #ccc;
-            border-radius: 6px;
+            border-radius: 8px;
             font-size: 14px;
-        }
-
-        input[type="file"] {
-            margin-top: 6px;
-            margin-bottom: 18px;
+            background-color: #f9f9f9;
         }
 
         button {
@@ -71,7 +75,7 @@
             color: white;
             padding: 12px;
             border: none;
-            border-radius: 6px;
+            border-radius: 8px;
             font-size: 15px;
             width: 100%;
             cursor: pointer;
@@ -85,7 +89,7 @@
         .alert {
             margin-top: 15px;
             padding: 12px;
-            border-radius: 6px;
+            border-radius: 8px;
             font-weight: bold;
         }
 
@@ -99,6 +103,36 @@
             background-color: #fff3cd;
             color: #856404;
             border: 1px solid #ffeeba;
+        }
+
+        .dipendenti-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        .dipendenti-table th, .dipendenti-table td {
+            text-align: left;
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .dipendenti-table th {
+            background-color: #f4f6f9;
+            color: #2c3e50;
+        }
+
+        .btn-danger {
+            background-color: #e74c3c;
+        }
+
+        .btn-danger:hover {
+            background-color: #c0392b;
+        }
+
+        .sezione-finali {
+            max-width: 900px;
+            margin: 40px auto;
         }
     </style>
 </head>
@@ -137,13 +171,11 @@
     <!-- Form Aggiunta Piatto -->
     <div class="form-box">
         <h2>Aggiungi Piatto</h2>
-
         {% if messaggio_piatto %}
             <div class="alert {% if 'esiste' in messaggio_piatto %}alert-warning{% else %}alert-success{% endif %}">
                 {{ messaggio_piatto }}
             </div>
         {% endif %}
-
         <form method="POST" action="{% url 'aggiungi_piatto' %}" enctype="multipart/form-data">
             {% csrf_token %}
             <label for="nome_piatto">Nome Piatto:</label>
@@ -176,7 +208,6 @@
                 {{ messaggio_dipendente }}
             </div>
         {% endif %}
-
         <form method="POST" action="{% url 'aggiungi_dipendente' %}">
             {% csrf_token %}
             <label for="nome">Nome:</label>
@@ -191,6 +222,38 @@
             <button type="submit">Aggiungi Dipendente</button>
         </form>
     </div>
+</div>
+
+<!-- Elenco Dipendenti -->
+<div class="form-box sezione-finali">
+    <h2>Dipendenti Attuali</h2>
+    {% if dipendenti %}
+        <table class="dipendenti-table">
+            <tr>
+                <th>ID</th>
+                <th>Nome</th>
+                <th>Ruolo</th>
+                <th>Azioni</th>
+            </tr>
+            {% for d in dipendenti %}
+                {% if d.id_personale %}
+                <tr>
+                    <td>{{ d.id_personale }}</td>
+                    <td>{{ d.nome_pers }}</td>
+                    <td>{{ d.ruolo }}</td>
+                    <td>
+                        <form method="POST" action="{% url 'elimina_dipendente' d.id_personale %}" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-danger">Elimina</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endif %}
+            {% endfor %}
+        </table>
+    {% else %}
+        <p>Nessun dipendente registrato.</p>
+    {% endif %}
 </div>
 
 </body>

@@ -3,7 +3,10 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <title>Ordina Sushi</title>
+    <header>
+    <span style="font-size: 0.8em; color: #ccc;">Sei al tavolo 1</span>
+</header>
+
     <style>
         body {
             font-family: 'Segoe UI', sans-serif;
@@ -115,6 +118,7 @@
         {% endif %}
     </div>
 </div>
+<a href="{% url 'storico_ordini' %}">📦 Vedi storico ordini</a>
 
 </body>
 </html>

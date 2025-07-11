@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>Storico Ordini</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            font-size: 1.8em;
+        }
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        .ordine {
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #ddd;
+        }
+        .ordine h3 {
+            margin: 0;
+            font-size: 1.2em;
+            color: #34495e;
+        }
+        .ordine ul {
+            margin-top: 10px;
+            padding-left: 20px;
+        }
+        .ordine li {
+            font-size: 0.95em;
+            margin-bottom: 4px;
+        }
+        .no-ordini {
+            text-align: center;
+            font-size: 1.1em;
+            color: #888;
+        }
+        .back-link {
+            display: block;
+            margin: 30px auto 0;
+            text-align: center;
+            font-size: 1em;
+            color: #2980b9;
+            text-decoration: none;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+<header>📦 Storico Ordini</header>
+
+<div class="container">
+    {% if lista_ordini %}
+        {% for item in lista_ordini %}
+            <div class="ordine">
+                <h3>🧾 Ordine n. {{ item.ordine.id_ordine }} – Tavolo {{ item.ordine.id_tavolo.id_tavolo }} ({{ item.ordine.npiatti }} piatti)</h3>
+                <ul>
+                    {% for nome, qty in item.piatti %}
+                        <li>{{ qty }}× {{ nome }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p class="no-ordini">Nessun ordine effettuato.</p>
+    {% endif %}
+</div>
+
+<a href="{% url 'piatti' %}" class="back-link">⬅️ Torna alla pagina di ordinazione</a>
+
+</body>
+</html>
